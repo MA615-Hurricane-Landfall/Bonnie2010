@@ -1,0 +1,224 @@
+---
+title: "Analysis of Landfall of Hurricane Bonnie 2010"
+subtitle: 'MA 615 Assignment III'
+author: 
+- Yuli Jin
+- Yanbing Chen
+- Boyu Chen
+- Yifeng He
+date: "Nov 16 2021"
+linestretch: 1.5
+fontsize: 11pt
+geometry: margin=2.5cm
+output: 
+    pdf_document:
+        template: NULL
+        latex_engine: xelatex
+header-includes:
+  - \usepackage{fontspec}
+  - \setmainfont{Times New Roman}
+
+---
+
+
+
+```{r setup, include=FALSE}
+#mainfont: "Times New Roman"
+#\usepackage[fontsize=20pt]{scrextend}
+knitr::opts_chunk$set(warning=F,message = F , echo = FALSE)
+knitr::opts_chunk$set(fig.width=8, fig.height=3) 
+```
+
+## Abstract
+
+The goal of this report is to describe the landfall of hurricane Bonnie at Louisiana in 2010, including maps, variograms, and plots to show the detailed climate changes and impacts of the hurricane. Our group specifically chose the format of report because it is a relatively formal and professional way to tell our analysis. Secondly, report can show more detailed information and clearer explanations of graphs compared to slides and shiny. At last, such format can include other contextual information, like safety tips and environmental influences, to give readers a comprehensive view of hurricane Bonnie.
+
+## Introduction
+
+Tropical cyclone, also known as hurricane, is a special climate phenomenon that has strong winds, heavy rains, a low-pressure center, and rapid rotating storm. This report focuses on hurricane Bonnie in July 2010. Began with a tropical wave from African coast in July 10, Bonnie established its low-pressure center on 22 July over Bahamas and continued to move on to Florida. As a relative weak and small hurricane, Bonnie lost its form 4 hours after the landfall on Florida on 23 July. Then it regained its form, but less organized, over Gulf of Mexico and caused strong climate changes in Louisiana on 24 July. Below is the map showing the track of Bonnie:
+
+```{r fig.cap="map of Bonnie track"}
+# Figure 1, map of Bonnie track
+library(ggplot2)
+library(tidyverse)
+library(magrittr)
+library(hurricaneexposuredata)
+library(hurricaneexposure)
+source('map_counties_j.R')
+
+data("hurr_tracks")
+
+Bonnie<-hurr_tracks %>% dplyr::filter(storm_id=='Bonnie-2010')
+map_tracks(storms = "Bonnie-2010",alpha = 0.5,
+           plot_points = TRUE,
+           color = "blue")+ggplot2::ggtitle("Track of Bonnie(2010)")+
+  ggplot2::theme(plot.title = element_text(hjust=0.5))
+
+```
+
+\newpage
+
+## Landfall
+
+On the morning of July 25, 2010, Bonnie landed on Orleans Parish in Louisiana. The influence of Bonnie on climate change, however, started before the landfall. The map below shows the rainfall before the landfall of Bonnie, where the western side of Louisiana and southern side of Mississippi had heavy rain that amounted to 100 mm. 
+
+```{r fig.cap="Rain during Bonnie for day before and day of closest approach"}
+#Fig 2, Rain during Bonnie for day before and day of closest approach
+#using rain only from the day before and the day the strom was closest to each county
+map_counties_j(storm = "Bonnie-2010",metric = "rainfall",days_included = -1:0)+
+  ggplot2::ggtitle("Rain during Bonnie(2010) for day before and day of closest approach")+
+  ggplot2::theme(plot.title = element_text(hjust=0.5))
+
+```
+
+When Bonnie fully landed on Louisiana, rainfall increased. Figure 3 shows the the rainfall during Bonnie’s landing and it shows that the largest rainfall amounted to 167 mm. Figure 4 shows the overall rainfall amount for eight days, five days before Bonnie’s landing and three days after it went away, and the rainfall in Louisiana increased 20 ~ 200 mm.
+
+```{r fig.cap="Rainfall during Bonnie"}
+#Fig 3a, Rainfall during Bonnie; Fig 3b, rainfall five days and three days after Bonnie
+
+map_counties_j(storm = "Bonnie-2010",metric="rainfall")+
+  ggplot2::ggtitle("Rainfall During Bonnie(2010)")+
+  ggplot2::theme(plot.title = element_text(hjust=0.5))
+
+
+```
+
+```{r fig.cap="rainfall five days and three days after Bonnie"}
+map_counties_j(storm = "Bonnie-2010",metric = "rainfall",days_included = -5:3)+
+  ggplot2::ggtitle("Rain during Bonnie(2010)  for five days before to \n three days/after the day of closest approach")+
+  ggplot2::theme(plot.title = element_text(hjust=0.5))
+```
+
+
+Besides the influence of rainfall, Bonnie also affected the wind speed in Louisiana. The graph below shows the wind speed when Bonnie took the landing. More than half of Louisiana and areas of Mississippi experienced increase in wind speed of 4 ~12 m/s.
+
+```{r fig.cap="wind speed during Bonnie"}
+#Fig 4, wind speed during Bonnie
+# plot the maximum wind during the storm for each county
+map_counties_j(storm = "Bonnie-2010",metric = "wind")+
+  ggplot2::ggtitle("Wind During Bonnie(2010)")+
+  ggplot2::theme(plot.title = element_text(hjust=0.5))
+```
+
+Our group furthered the analysis and plotted a variogram for data points near Louisiana. The graph below shows the effect of hurricane Bonnie related to distance between the hurricane and the point chosen. The x-lab is the semi-variance of log rainfall, which shows the variance of amount of rainfall; the y-lab is distance, which means the point distance between two counties. The larger the semi-variance, the lower the effect of hurricane; when the line becomes horizontal, it means hurricane Bonnie has no effect on rainfall and the difference in amount of rainfall is determined randomly. 
+
+Table: head of variogram analysis dataframe
+
+|state   |county    |fips  |   re_x|  re_y|storm_id    |usa_atcf_id | lag| precip| precip_max|
+|:-------|:---------|:-----|------:|-----:|:-----------|:-----------|---:|------:|----------:|
+|florida |alachua   |12001 | -82.31| 29.65|Bonnie-2010 |AL032010    |   0|    0.0|        0.1|
+|florida |bay       |12005 | -85.69| 30.23|Bonnie-2010 |AL032010    |   0|    1.6|        3.2|
+|florida |brevard   |12009 | -80.81| 28.37|Bonnie-2010 |AL032010    |   0|    4.9|        8.1|
+|florida |broward   |12011 | -80.40| 26.08|Bonnie-2010 |AL032010    |   0|   23.5|       30.4|
+|florida |calhoun   |12013 | -85.10| 30.42|Bonnie-2010 |AL032010    |   0|    1.6|        3.3|
+|florida |charlotte |12015 | -82.14| 26.92|Bonnie-2010 |AL032010    |   0|   14.0|       16.7|
+
+```{r fig.cap="variogram of Louisiana"}
+#Fig 5, variogram of Louisiana
+library(gstat) 
+library(sp)
+source('get_variogram_data.R')
+df<-get_variogram()
+fl<-df %>% filter(state %in% c('florida'),precip_max>0)
+fl$re_x<-as.numeric(fl$re_x)
+fl$re_y<-as.numeric(fl$re_y)
+coordinates(fl) <- ~ re_x + re_y
+TheVariogram=variogram(log(precip_max)~1, data=fl)
+#plot(TheVariogram)
+TheVariogramModel <- vgm(psill=0.15,model = 'Sph')
+FittedModel <- fit.variogram(TheVariogram, model=TheVariogramModel)
+plot(TheVariogram, model=FittedModel,ylim=c(0,2.5))
+
+```
+
+
+
+Then we turned to another dataset, the buoys data, and plot time series graphs of wind speed and atmosphere temperature. Figure 7.1 shows the wind speed (m/s) on average over an eight-minute period for buoys and a two-minute period for land stations. The average wind speed increased dramatically at the night of July 24, which is just prior to the landfall of Bonnie at Louisiana. Figure 7.2 reveals the peak gust speed for 5 or 8 seconds measured during the eight-minute or two-minute period. Similar to the pattern of average wind speed, it is clear that the gust speed reached maximum at the night of July 24. Figure 7.3 measures the atmosphere air temperature in Celsius alone time passage. The decline of temperature at 11am on July 25 indicates that the center of Bonnie was above the measuring point for the low-pressure hurricane center has lower temperature.    
+Overall, the landfall of Bonnie led to increase in rainfall, wind speed, and decrease in temperature in Louisiana. 
+
+```{r}
+# fl$re_x<-fl$re_x %>% round(2)
+# fl$re_y<-fl$re_y %>% round(2)
+```
+
+
+
+```{r fig.width=10, fig.height=6,fig.cap="buoy data plot"}
+#Fig 6, buoy data plot
+library(lubridate)
+library(reshape2)
+library(scales)
+library(ggpubr)
+taml1_url<-'https://www.ndbc.noaa.gov/view_text_file.php?filename=taml1h2010.txt.gz&dir=data/historical/stdmet/'
+taml1 <-read_table(taml1_url) %>% `[`(2:dim(.)[1],)
+#taml1 %>% filter(mo=='07',dy %in% seq(22,25)) %>% group_by(dy) %>% summarise(dy_c=n())
+klpl1_url<-'https://www.ndbc.noaa.gov/view_text_file.php?filename=lkpl1h2010.txt.gz&dir=data/historical/stdmet/'
+klpl1 <-read_table(klpl1_url) %>% `[`(2:dim(.)[1],)
+#klpl1 %>% filter(mo=='07',dy %in% seq(22,25)) %>% group_by(dy) %>% summarise(dy_c=n())
+taml1_b<-taml1 %>% filter(MM=='07',DD %in% seq(22,25))
+klpl1_b<-klpl1 %>% filter(MM=='07',DD %in% seq(22,25))
+
+taml1_b$time=ymd_h(paste0(taml1_b$`#YY`,taml1_b$MM,taml1_b$DD,taml1_b$hh),tz='GMT') 
+klpl1_b$time=ymd_h(paste0(klpl1_b$`#YY`,klpl1_b$MM,klpl1_b$DD,klpl1_b$hh),tz='GMT') 
+
+taml1_b2<-taml1_b %>% dplyr::select(time,WSPD,GST,ATMP)
+klpl1_b2<-klpl1_b %>% dplyr::select(time,WSPD,GST,ATMP)
+join_df<-left_join(taml1_b2,klpl1_b2,by='time')
+join_df2<-melt(join_df,id=c('time'))
+join_df2$value=as.numeric(join_df2$value)
+
+wspd_p<-join_df2 %>% filter(variable %in% c('WSPD.x','WSPD.y')) %>% ggplot(aes(x=time,y=value,color=variable))+
+  geom_line()+scale_x_datetime(labels = date_format("%m-%d %H"),breaks="8 hour")+
+  labs(title='WSPD Time Series',y='WSPD')+scale_color_discrete(name = "Buoy", labels = c("taml1", "klpl1"))+theme_classic()+
+  theme(plot.title = element_text(hjust = 0.5),axis.text.x = element_text(angle=90))
+
+
+gst_p<-join_df2 %>% filter(variable %in% c('GST.x','GST.y')) %>% ggplot(aes(x=time,y=value,color=variable))+
+  geom_line()+scale_x_datetime(labels = date_format("%m-%d %H"),breaks="8 hour")+
+  labs(title='GST Time Series',y='GST')+scale_color_discrete(name = "Buoy", labels = c("taml1", "klpl1"))+theme_classic()+
+  theme(plot.title = element_text(hjust = 0.5),axis.text.x = element_text(angle=90))
+
+atmp_p<-join_df2 %>% filter(variable %in% c('ATMP.x','ATMP.y')) %>% ggplot(aes(x=time,y=value,color=variable))+
+  geom_line()+scale_x_datetime(labels = date_format("%m-%d %H"),breaks="8 hour")+
+  labs(title='ATMP Time Series',y='ATMP')+scale_color_discrete(name = "Buoy", labels = c("taml1", "klpl1"))+theme_classic()+
+  theme(plot.title = element_text(hjust = 0.5),axis.text.x = element_text(angle=90))
+
+
+figure <- ggarrange(wspd_p, gst_p, atmp_p,
+                    labels=c('Figure7.1','Figure7.2','Figure7.3'),font.label=list(size=11),legend='bottom',
+                    ncol = 2, nrow = 2)
+figure 
+
+```
+
+\newpage
+
+## Discussion
+
+The analysis of landfall of Bonnie in the above section utilized two datasets, Hurricane Exposure data and buoy data. The two datasets both recorded the climate change before, during and after hurricane Bonnie came through. However, the buoy dataset had shorter interval of data recording, that each buoy recorded climate change every 6 minutes; the Hurricane Exposure data recorded the the changes every 6 hours. Moreover, buoys are set over the ocean, but the Exposure dataset only has climate information over lands for states and counties.     
+When we took a look at the buoy dataset, we found that it was easier and faster to began with a small set of buoy data. However, less data means less accurate result and then we included more buoy points to form a more comprehensive, concise, and accurate analysis result. Another characteristic of the buoy dataset is the short time interval and it was hard to include all the data points. We tried different ways to manipulate the dataset: use mean of buoys can summarize the characters of climate changes in a time interval; use the median of buoy data is easier to analyze but it would lead inaccuracy in the analysis. A last, we chose to use hourly buoy data to complete our analysis of climate change over time when Bonnie came through. Such method required less manipulating effort but also corresponding to the time interval of the Exposure data.    
+Our group also used variogram to determine the effects of hurricane. Variogram is a special analyzing method that it considers spatial factors instead of simple correlated relations between variables. The effects of hurricane is shown through the relative position of data points. Such analysis reveals the influence of Bonnie in another aspect.    
+Besides the statistical analysis, we thought we should include more information about self-protection in the time of hurricane. Here we propose several safety guidelines for individuals and families to protect themselves in the situation of floods:
+
+*	Listen to radio for the latest update.
+*	Prepare a set of tools, medicines, and at least one gallon of water.
+*	Do not drink flood water nor drive through the water.
+*	Only return to your house when authorities allowed.
+
+We also propose several safety tips during thunderstorm and strong wind, which always occurred with hurricane:
+
+*	Get the latest weather update from NOAA website and Weather Radio.
+*	Take shelter in the center of your house or in the basement, stay away from windows and fragile structures.
+*	Move vehicles into garage or high ground; clear surroundings and make sure that light things are tied to the ground.
+*	Prepare an emergency toolkit with tools and medicines.
+
+These contextual information helped us to know more about hurricane and how to keep safe from natural disasters. We should not only examine the effects of hurricane by statistical analysis, but also research for peripheral knowledge to help us think in more critical and comprehensive way.
+
+## Conclusion
+
+Even though Bonnie is a relatively small hurricane, it still causes approximately 1.3 million dollars of damage. The wind speed in Louisiana surpassed 15 m/s and the rainfall amounted more than 200 mm in two hours. The sudden increase of rain led to several floods and destroyed more than 100 homes; infrastructures like bridges and roads were damaged; the strong winds also destroyed two chicken houses with a total loss of 20,000 chickens. On the next day, July 26, the remnants of Bonnie moved to inland and caused more floods until it disappeared.    
+Overall, Bonnie resulted in $1.36 million of damage (USD 2010). Compared to other huge hurricanes, such damage is trivial and ignorable. However, this small hurricane still had strong impacts on people’s routine lives in Louisiana with disruptions in food supply and traffic. To protect individuals, we proposed several safety guidelines for people to follow in the above section.    
+In conclusion, Bonnie is a relatively small and weak hurricane but the landfall still cause infrastructure and food supply damage. Civilians should follow safety guidelines to prepare Bonnie and future hurricanes. 
+
+
+
