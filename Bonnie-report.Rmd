@@ -133,8 +133,9 @@ plot(TheVariogram, model=FittedModel,ylim=c(0,2.5))
 
 
 
-Then we turned to another dataset, the buoys data, and plot time series graphs of wind speed and atmosphere temperature. Figure 7.1 shows the wind speed (m/s) on average over an eight-minute period for buoys and a two-minute period for land stations. The average wind speed increased dramatically at the night of July 24, which is just prior to the landfall of Bonnie at Louisiana. Figure 7.2 reveals the peak gust speed for 5 or 8 seconds measured during the eight-minute or two-minute period. Similar to the pattern of average wind speed, it is clear that the gust speed reached maximum at the night of July 24. Figure 7.3 measures the atmosphere air temperature in Celsius alone time passage. The decline of temperature at 11am on July 25 indicates that the center of Bonnie was above the measuring point for the low-pressure hurricane center has lower temperature.    
-Overall, the landfall of Bonnie led to increase in rainfall, wind speed, and decrease in temperature in Louisiana. 
+Then we turned to another dataset, the buoys data, and plot time series graphs of wind speed and atmosphere temperature. Figure 7.1 shows the wind speed (m/s) on average over an eight-minute period for buoys and a two-minute period for land stations. The average wind speed increased dramatically at the night of July 24, which is just prior to the landfall of Bonnie at Louisiana. Figure 7.2 reveals the peak gust speed for 5 or 8 seconds measured during the eight-minute or two-minute period. Similar to the pattern of average wind speed, it is clear that the gust speed reached maximum at the night of July 24. Figure 7.3 measures the atmosphere air temperature in Celsius alone time passage. The decline of temperature at 11am on July 25 indicates that the center of Bonnie was above the measuring point for the low-pressure hurricane center has lower temperature. Figure 8 showed the map of location of two buoys in this report. We found the nearest buoys based on the track of the hurricane in Louisiana displayed in Figure 1 so as to compare the wind speed in buoys and counties. The relation between buoys and exposure data were closely related. For example, in Figure 5, the wind speed of the landfall of Bonnie was about $9-12m/s$ in coastal county and the peak gust speed of wind reached to $10m/s$ during the landfall of Bonnie in Figure 7.2.           
+Overall, the landfall of Bonnie led to increase in rainfall, wind speed, and decrease in temperature in Louisiana.     
+
 
 ```{r}
 # fl$re_x<-fl$re_x %>% round(2)
@@ -169,18 +170,18 @@ join_df2$value=as.numeric(join_df2$value)
 
 wspd_p<-join_df2 %>% filter(variable %in% c('WSPD.x','WSPD.y')) %>% ggplot(aes(x=time,y=value,color=variable))+
   geom_line()+scale_x_datetime(labels = date_format("%m-%d %H"),breaks="8 hour")+
-  labs(title='WSPD Time Series',y='WSPD')+scale_color_discrete(name = "Buoy", labels = c("taml1", "klpl1"))+theme_classic()+
+  labs(title='WSPD Time Series',y='WSPD')+scale_color_discrete(name = "Buoy", labels = c("taml1", "lkpl1"))+theme_classic()+
   theme(plot.title = element_text(hjust = 0.5),axis.text.x = element_text(angle=90))
 
 
 gst_p<-join_df2 %>% filter(variable %in% c('GST.x','GST.y')) %>% ggplot(aes(x=time,y=value,color=variable))+
   geom_line()+scale_x_datetime(labels = date_format("%m-%d %H"),breaks="8 hour")+
-  labs(title='GST Time Series',y='GST')+scale_color_discrete(name = "Buoy", labels = c("taml1", "klpl1"))+theme_classic()+
+  labs(title='GST Time Series',y='GST')+scale_color_discrete(name = "Buoy", labels = c("taml1", "lkpl1"))+theme_classic()+
   theme(plot.title = element_text(hjust = 0.5),axis.text.x = element_text(angle=90))
 
 atmp_p<-join_df2 %>% filter(variable %in% c('ATMP.x','ATMP.y')) %>% ggplot(aes(x=time,y=value,color=variable))+
   geom_line()+scale_x_datetime(labels = date_format("%m-%d %H"),breaks="8 hour")+
-  labs(title='ATMP Time Series',y='ATMP')+scale_color_discrete(name = "Buoy", labels = c("taml1", "klpl1"))+theme_classic()+
+  labs(title='ATMP Time Series',y='ATMP')+scale_color_discrete(name = "Buoy", labels = c("taml1", "lkpl1"))+theme_classic()+
   theme(plot.title = element_text(hjust = 0.5),axis.text.x = element_text(angle=90))
 
 
@@ -190,6 +191,43 @@ figure <- ggarrange(wspd_p, gst_p, atmp_p,
 figure 
 
 ```
+
+
+```{r fig.width=6,fig.cap='Buoy Location'}
+get_eastern_map <- function(map  = "county"){
+  
+  eastern_states <- c("louisiana")
+  
+  map_data <- ggplot2::map_data(map = map) %>%
+    dplyr::filter(.data$region %in% eastern_states)
+  
+  if(map == "county"){
+    county.fips <- maps::county.fips %>%
+      dplyr::mutate(polyname = as.character(.data$polyname)) %>%
+      dplyr::mutate(polyname = stringr::str_replace(.data$polyname,
+                                                    ":.+", ""))
+    map_data <- map_data %>%
+      tidyr::unite(col = "polyname", .data$region:.data$subregion,
+                   sep = ",") %>%
+      dplyr::left_join(county.fips, by = "polyname") %>%
+      dplyr::mutate(fips = stringr::str_pad(.data$fips, 5,
+                                            side = "left", pad = "0"))
+  }
+  
+  return(map_data)
+}
+
+out_data <- get_eastern_map() 
+buoy=data.frame(long=c(-90.665,-90.281),lat=c(29.188,30.315))           
+ggplot()+geom_polygon(data=out_data,aes(x = long, y = lat, group = group),fill="lightgray",alpha=0.5, colour = "white")+ 
+  ggplot2::borders("state", regions = c("louisiana"), colour = "black", fill = NA, size = 0.5, alpha = 0.5)+
+  geom_point(data=buoy,aes(x=long,y=lat),color='red')+
+  geom_text(data=buoy,aes(x=long,y=lat,label = c('TAML1','LKPL1')),vjust = "inward", hjust = "inward",size=5)+
+  xlim(c(-95,-87.5))+ylim(c(28.5,33.2))+ggplot2::theme_void()+labs(title='buoy Location')+
+  theme(plot.title = element_text(hjust = 0.5))
+```
+
+
 
 \newpage
 
